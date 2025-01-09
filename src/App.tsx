@@ -71,7 +71,7 @@ function App() {
   return (
     <div className="mx-32 my-24">
       <div className="px-12 py-10 bg-zinc-50 rounded-xl border">
-        <h1 className="text-3xl font-black text-zinc-900 tracking-tighter">
+        <h1 className="text-2xl font-black text-zinc-900 tracking-tight">
           Calculateur de Consommation
         </h1>
         <h2 className="text-lg font-semibold text-zinc-500">
