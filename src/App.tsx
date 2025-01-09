@@ -31,10 +31,12 @@ function App() {
     {
       title: "Transferts / an",
       min: 100,
-      max: 10_000,
+      max: 100_000,
       step: 100,
       unit: "Gb",
-      impact: 0.066
+      impact: 0.066,
+      dataSource:
+        "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
     },
   ];
 
