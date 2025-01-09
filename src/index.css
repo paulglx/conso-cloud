@@ -8,13 +8,11 @@
 :root {
   font-family: "Geist", serif;
   font-optical-sizing: auto;
-  font-weight: <weight>;
   font-style: normal;
 }
 
 .geist-mono {
   font-family: "Geist Mono", serif;
   font-optical-sizing: auto;
-  font-weight: <weight>;
   font-style: normal;
 }
