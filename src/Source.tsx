@@ -37,6 +37,7 @@ const Source = (props: SourceProps) => {
         <a
           href={props.dataSource}
           className="text-sm hover:underline cursor-pointer text-blue-700"
+          target="_blank"
         >
           Source
         </a>
