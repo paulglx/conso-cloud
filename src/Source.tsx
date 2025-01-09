@@ -7,7 +7,6 @@ export type SourceProps = {
   step?: number;
   unit: string;
   impact: number; // In kWh/year
-  dataSource: string; // url of source for metrics
   value: number;
   onValueChange: (value: number) => void;
 };
