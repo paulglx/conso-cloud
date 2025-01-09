@@ -33,6 +33,7 @@ const Source = (props: SourceProps) => {
       />
       <div className="flex items-center justify-between">
         <span className="geist-mono">{sourceImpact} kWh/an</span>
+<<<<<<<<< Temporary merge branch 1
         <a
           href={props.dataSource}
           className="text-sm hover:underline cursor-pointer text-blue-700"
@@ -40,6 +41,15 @@ const Source = (props: SourceProps) => {
         >
           Source
         </a>
+||||||||| 784c6d4
+        <a
+          href={props.dataSource}
+          className="text-sm hover:underline cursor-pointer text-blue-700"
+        >
+          Source
+        </a>
+=========
+>>>>>>>>> Temporary merge branch 2
       </div>
     </div>
   );

@@ -30,6 +30,15 @@ function App() {
     },
     {
       title: "Transferts / an",
+<<<<<<<<< Temporary merge branch 1
+      min: 100,
+      max: 10_000,
+      step: 100,
+      unit: "Gb",
+      impact: 0.066,
+      dataSource:
+        "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
+||||||||| 784c6d4
       min: 100,
       max: 100_000,
       step: 100,
@@ -37,6 +46,12 @@ function App() {
       impact: 0.066,
       dataSource:
         "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
+=========
+      min: 1,
+      max: 50,
+      unit: "Tb",
+      impact: 66
+>>>>>>>>> Temporary merge branch 2
     },
   ];
 
