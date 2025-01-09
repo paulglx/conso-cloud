@@ -1,19 +1,32 @@
 import { useState } from "react";
 import Source, { SourceProps } from "./Source";
 import { roundToDecimals } from "./util";
+import { CloudProvider, REGIONS_BY_PROVIDER, CO2_INTENSITY } from './cloudProviderData';
 
 type SourceConfig = Omit<SourceProps, "value" | "onValueChange">;
 
+const SOURCES = [
+  {
+    name: "Cloud Carbon Footprint",
+    url: "https://www.cloudcarbonfootprint.org/docs/methodology/#appendix-v-grid-emissions-factors"
+  },
+  {
+    name: "Greenly",
+    url: "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage"
+  }
+];
+
 function App() {
+  const [cloudProvider, setCloudProvider] = useState<CloudProvider>('AWS');
+  const [region, setRegion] = useState<string>(REGIONS_BY_PROVIDER.AWS[0].id);
+
   const sources: SourceConfig[] = [
     {
       title: "Stockage",
       min: 1,
       max: 50,
       unit: "Tb",
-      impact: 0.0936,
-      dataSource:
-        "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
+      impact: 0.0936
     },
     {
       title: "Transferts / an",
@@ -21,9 +34,7 @@ function App() {
       max: 100_000,
       step: 100,
       unit: "Gb",
-      impact: 0.066,
-      dataSource:
-        "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
+      impact: 0.066
     },
   ];
 
@@ -44,8 +55,18 @@ function App() {
     1,
   );
 
+  const co2Impact = roundToDecimals(
+    totalImpact * CO2_INTENSITY[cloudProvider][region] * 1000,
+    1
+  );
+
   const handleSourceChange = (title: string, value: number) => {
     setSourceValues((prev) => ({ ...prev, [title]: value }));
+  };
+
+  const handleProviderChange = (newProvider: CloudProvider) => {
+    setCloudProvider(newProvider);
+    setRegion(REGIONS_BY_PROVIDER[newProvider][0].id);
   };
 
   return (
@@ -58,7 +79,33 @@ function App() {
           Quelle conso pour mon cloud ?
         </h2>
       </div>
-      <div className="grid grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-4 gap-6 mt-6">
+        <div className="w-full bg-zinc-50 border p-10 rounded-xl">
+          <h3 className="text-lg text-zinc-700 font-bold">Cloud Provider</h3>
+          <select
+            value={cloudProvider}
+            onChange={(e) => handleProviderChange(e.target.value as CloudProvider)}
+            className="mt-2 w-full p-2 rounded border border-zinc-200"
+          >
+            <option value="AWS">AWS</option>
+            <option value="GCP">GCP</option>
+            <option value="Azure">Azure</option>
+          </select>
+        </div>
+        <div className="w-full bg-zinc-50 border p-10 rounded-xl">
+          <h3 className="text-lg text-zinc-700 font-bold">Region</h3>
+          <select
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            className="mt-2 w-full p-2 rounded border border-zinc-200"
+          >
+            {REGIONS_BY_PROVIDER[cloudProvider].map(region => (
+              <option key={region.id} value={region.id}>
+                {region.name}
+              </option>
+            ))}
+          </select>
+        </div>
         {sources.map((config) => (
           <Source
             key={config.title}
@@ -67,7 +114,7 @@ function App() {
             onValueChange={(value) => handleSourceChange(config.title, value)}
           />
         ))}
-        <div className="w-full bg-green-50 border border-green-200 p-10 rounded-xl">
+        <div className="w-full bg-green-50 border border-green-200 p-10 rounded-xl col-start-2 col-span-2">
           <h3 className="text-lg text-green-700 font-bold">
             Consommation totale
           </h3>
@@ -81,11 +128,29 @@ function App() {
           <span className="text-green-600">
             soit&nbsp;
             <span className="font-semibold geist-mono">
-              {roundToDecimals(totalImpact * 0.42735, 1)} kgCO2e
+              {co2Impact} kgCO2e
             </span>
             &nbsp;émis par an
           </span>
         </div>
+      </div>
+      
+      <div className="mt-12 px-12 py-10 bg-zinc-50 rounded-xl border">
+        <h3 className="text-lg font-bold text-zinc-700 mb-4">Sources</h3>
+        <ul className="space-y-2">
+          {SOURCES.map(source => (
+            <li key={source.url}>
+              <a 
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-600 hover:text-green-700 hover:underline"
+              >
+                {source.name}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
