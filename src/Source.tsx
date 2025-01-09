@@ -17,7 +17,7 @@ const Source = (props: SourceProps) => {
   return (
     <div className="w-full bg-zinc-50 p-10 rounded-xl border">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-lg">{props.title}</h3>
+        <h3 className="font-semibold text-lg text-zinc-800">{props.title}</h3>
         <span className="text-lg geist-mono">
           <span className="font-bold">{props.value}</span> {props.unit}
         </span>
@@ -33,23 +33,6 @@ const Source = (props: SourceProps) => {
       />
       <div className="flex items-center justify-between">
         <span className="geist-mono">{sourceImpact} kWh/an</span>
-<<<<<<<<< Temporary merge branch 1
-        <a
-          href={props.dataSource}
-          className="text-sm hover:underline cursor-pointer text-blue-700"
-          target="_blank"
-        >
-          Source
-        </a>
-||||||||| 784c6d4
-        <a
-          href={props.dataSource}
-          className="text-sm hover:underline cursor-pointer text-blue-700"
-        >
-          Source
-        </a>
-=========
->>>>>>>>> Temporary merge branch 2
       </div>
     </div>
   );
