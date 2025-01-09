@@ -30,11 +30,10 @@ function App() {
     },
     {
       title: "Transferts / an",
-      min: 100,
-      max: 100_000,
-      step: 100,
-      unit: "Gb",
-      impact: 0.066
+      min: 1,
+      max: 50,
+      unit: "Tb",
+      impact: 66
     },
   ];
 
