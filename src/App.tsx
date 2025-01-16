@@ -19,6 +19,11 @@ const SOURCES = [
     name: "Greenly",
     url: "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
   },
+  {
+    name: "Empreinte carbone en France en 2022",
+    url: "https://www.statistiques.developpement-durable.gouv.fr/lempreinte-carbone-de-la-france-de-1995-2022",
+  },
+  
 ];
 
 function App() {
