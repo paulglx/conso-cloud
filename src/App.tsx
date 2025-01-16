@@ -21,6 +21,12 @@ const SOURCES = [
   },
 ];
 
+const PROVIDER_PUE: Record<CloudProvider, number> = {
+  AWS: 1.135,
+  GCP: 1.1,
+  Azure: 1.185,
+};
+
 function App() {
   const [cloudProvider, setCloudProvider] = useState<CloudProvider>("AWS");
   const [region, setRegion] = useState<string>(REGIONS_BY_PROVIDER.AWS[0].id);
@@ -60,7 +66,7 @@ function App() {
     sources.reduce(
       (sum, config) => sum + sourceValues[config.title] * config.impact,
       0,
-    ),
+    ) * PROVIDER_PUE[cloudProvider],
     1,
   );
 
@@ -102,6 +108,9 @@ function App() {
             <option value="GCP">GCP</option>
             <option value="Azure">Azure</option>
           </select>
+          <div className="flex items-center justify-between">
+            <span className="geist-mono">{PROVIDER_PUE[cloudProvider]} &nbsp;PUE</span>
+          </div>
         </div>
         <div className="w-full bg-zinc-50 border p-10 rounded-xl">
           <h3 className="text-lg text-zinc-800 font-bold">Region</h3>
@@ -116,6 +125,9 @@ function App() {
               </option>
             ))}
           </select>
+          <div className="flex items-center justify-between">
+            <span className="geist-mono">{(CO2_INTENSITY[cloudProvider][region] * 1000).toFixed(2)} &nbsp;kgCO2e/kWh </span>
+          </div>
         </div>
         {sources.map((config) => (
           <Source
