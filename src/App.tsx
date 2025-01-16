@@ -39,20 +39,24 @@ function App() {
     "Utilisation moyenne des vCPUs": 0,
     "Stockage HDD": 0,
     "Stockage SSD": 0,
+    "Transfert réseau": 0,
   });
 
   /// Computations /// 
   const HOURS_PER_YEAR = 8760;
+  const MONTH_PER_YEAR = 12;
 
-  const hddImpact = sourceValues["Stockage HDD"] * 0.00065 * HOURS_PER_YEAR; // Tb * kWh/Tb * hours
-  const ssdImpact = sourceValues["Stockage SSD"] * 0.00120 * HOURS_PER_YEAR; // Tb * kWh/Tb * hours
+  const hddImpact = sourceValues["Stockage HDD"] * 0.00065 * HOURS_PER_YEAR;
+  const ssdImpact = sourceValues["Stockage SSD"] * 0.00120 * HOURS_PER_YEAR;
   
   const cpuUtilization = sourceValues["Utilisation moyenne des vCPUs"] / 100;
   const cpuPower = CPU_POWER[cloudProvider].min + (CPU_POWER[cloudProvider].max - CPU_POWER[cloudProvider].min) * cpuUtilization;
-  const cpuImpact = sourceValues["Nombre de vCPUs"] * cpuPower * HOURS_PER_YEAR; // kWh * hours
+  const cpuImpact = sourceValues["Nombre de vCPUs"] * cpuPower * HOURS_PER_YEAR;
+  
+  const networkImpact = sourceValues["Transfert réseau"] * 1000 * 0.001 * MONTH_PER_YEAR;
   
   const totalElec: number = roundToDecimals(
-    (hddImpact + ssdImpact + cpuImpact) * PROVIDER_PUE[cloudProvider],
+    (hddImpact + ssdImpact + cpuImpact + networkImpact) * PROVIDER_PUE[cloudProvider],
     1
   );
 
@@ -155,6 +159,18 @@ function App() {
             onChange={(value) => handleSourceChange("Stockage SSD", value)}
           />
           <BoxConsumption value={ssdImpact} />
+        </Box>
+
+        <Box title="Réseau">
+          <BoxInput
+            label="Transfert"
+            value={sourceValues["Transfert réseau"]}
+            unit="Tb/mois"
+            min={0}
+            max={100}
+            onChange={(value) => handleSourceChange("Transfert réseau", value)}
+          />
+          <BoxConsumption value={networkImpact} />
         </Box>
 
         <Box title="Consommation totale" className="bg-green-50 border-green-200 col-span-3">
