@@ -17,6 +17,11 @@ const SOURCES = [
     name: "Greenly",
     url: "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
   },
+  {
+    name: "Empreinte carbone en France en 2022",
+    url: "https://www.statistiques.developpement-durable.gouv.fr/lempreinte-carbone-de-la-france-de-1995-2022",
+  },
+
 ];
 
 
@@ -46,6 +51,9 @@ function App() {
   const [cloudProvider, setCloudProvider] = useState<CloudProvider>("AWS");
   const [region, setRegion] = useState<string>(REGIONS_BY_PROVIDER.AWS[0].id);
 
+  const [cloudProviderBis, setCloudProviderBis] = useState<CloudProvider>("AWS");
+  const [regionBis, setRegionBis] = useState<string>(REGIONS_BY_PROVIDER.AWS[0].id);
+
   const [sourceValues, setSourceValues] = useState<Record<string, number>>({
     "Nombre de vCPUs": 0,
     "Utilisation moyenne des vCPUs": 0,
@@ -61,15 +69,23 @@ function App() {
   // Impacts are in W/year.
   const hddImpact = sourceValues["Stockage HDD"] * 0.65 * HOURS_PER_YEAR;
   const ssdImpact = sourceValues["Stockage SSD"] * 1.20 * HOURS_PER_YEAR;
-  
+
   const cpuUtilization = sourceValues["Utilisation moyenne des vCPUs"] / 100;
   const cpuPower = CPU_POWER[cloudProvider].min + (CPU_POWER[cloudProvider].max - CPU_POWER[cloudProvider].min) * cpuUtilization;
   const cpuImpact = sourceValues["Nombre de vCPUs"] * cpuPower * HOURS_PER_YEAR;
-  
+
+  const cpuPowerBis = CPU_POWER[cloudProviderBis].min + (CPU_POWER[cloudProviderBis].max - CPU_POWER[cloudProviderBis].min) * cpuUtilization;
+  const cpuImpactBis = sourceValues["Nombre de vCPUs"] * cpuPowerBis * HOURS_PER_YEAR;
+
   const networkImpact = sourceValues["Transfert réseau"] * 1000 * MONTH_PER_YEAR;
-  
+
   const totalElec: number = roundToDecimals(
     (hddImpact + ssdImpact + cpuImpact + networkImpact) * PROVIDER_PUE[cloudProvider],
+    1
+  );
+
+  const totalElecBis: number = roundToDecimals(
+    (hddImpact + ssdImpact + cpuImpactBis + networkImpact) * PROVIDER_PUE[cloudProviderBis],
     1
   );
 
@@ -78,6 +94,16 @@ function App() {
     1
   );
   /// End of computations ///
+
+  const co2ImpactBis = roundToDecimals(
+    totalElecBis * CO2_INTENSITY[cloudProviderBis][regionBis] * 1000,
+    1,
+  );
+
+  const individualReferenceImpact = roundToDecimals(
+    co2Impact / 9200,
+    1,
+  );
 
   const handleSourceChange = (title: string, value: number) => {
     setSourceValues((prev) => ({ ...prev, [title]: value }));
@@ -88,8 +114,15 @@ function App() {
     setRegion(REGIONS_BY_PROVIDER[newProvider][0].id);
   };
 
+
+  const handleProviderChangeBis = (newProvider: CloudProvider) => {
+    setCloudProviderBis(newProvider);
+    setRegionBis(REGIONS_BY_PROVIDER[newProvider][0].id);
+  };
+
   return (
     <div className="mx-32 my-24">
+
       <Box title="Calculateur de Consommation" className="px-12 py-10">
         <h2 className="text-lg font-semibold text-zinc-500">
           Quelle conso pour mon cloud ?
@@ -201,11 +234,82 @@ function App() {
         </Box>
       </div>
 
+      <div className="w-full bg-zinc-50 border border-zinc-200 p-10 mt-6 rounded-xl col-span-3">
+        <h3 className="text-lg text-zinc-700 font-bold">
+          Comparaison avec un autre service cloud
+        </h3>
+      </div>
+
+      <div className="grid grid-cols-3 gap-6 mt-6">
+        <div className="w-full bg-zinc-50 border p-10 rounded-xl">
+          <h3 className="text-lg text-zinc-800 font-bold">Cloud Provider</h3>
+          <select
+            value={cloudProviderBis}
+            onChange={(e) =>
+              handleProviderChangeBis(e.target.value as CloudProvider)
+            }
+            className="mt-2 w-full p-2 rounded border border-zinc-200"
+          >
+            <option value="AWS">AWS</option>
+            <option value="GCP">GCP</option>
+            <option value="Azure">Azure</option>
+          </select>
+        </div>
+        <div className="w-full bg-zinc-50 border p-10 rounded-xl">
+          <h3 className="text-lg text-zinc-800 font-bold">Region</h3>
+          <select
+            value={regionBis}
+            onChange={(e) => setRegionBis(e.target.value)}
+            className="mt-2 w-full p-2 rounded border border-zinc-200"
+          >
+            {REGIONS_BY_PROVIDER[cloudProviderBis].map((region) => (
+              <option key={region.id} value={region.id}>
+                {region.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <Box title="Consommation totale" className="bg-zinc-50 border-zinc-200 col-span-1">
+          <span className="text-4xl font-black text-zinc-800 geist-mono">
+            {formatUnit(totalElecBis, 'Wh/an', 1)}
+          </span>
+          <br />
+          <span className="text-zinc-600">
+            soit&nbsp;
+            <span className="font-semibold geist-mono">
+              {formatUnit(co2ImpactBis, 'CO2e', 1)}
+            </span>
+            &nbsp;émis par an
+          </span>
+        </Box>
+      </div>
+
+
+      <div className="w-full bg-zinc-50 border border-zinc-200 p-10 mt-6 rounded-xl col-span-3">
+        <h3 className="text-lg text-zinc-700 font-bold">
+          Quelques chiffres de référence
+        </h3>
+        <span className="text-zinc-600">
+          <span className="text-4xl font-black text-zinc-800 geist-mono">
+            {formatUnit(co2Impact, 'CO2e', 1)}
+          </span>
+          <span className="text-zinc-700 font-semibold text-lg">
+            &nbsp;
+          </span>
+          <br />
+          Cela correspond aux émissions carbones moyennes de &nbsp;
+          <span className="font-semibold geist-mono">{individualReferenceImpact} habitants</span>
+          &nbsp; en France chaque année.
+        </span>
+      </div>
+
+
       <Box title="Sources" className="mt-6">
         <ul className="space-y-2">
           {SOURCES.map(source => (
             <li key={source.url}>
-              <a 
+              <a
                 href={source.url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -217,7 +321,8 @@ function App() {
           ))}
         </ul>
       </Box>
-    </div>
+
+    </div >
   );
 }
 
