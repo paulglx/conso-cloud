@@ -4,7 +4,7 @@ import {
   REGIONS_BY_PROVIDER,
 } from "./Data";
 
-import { roundToDecimals } from "./util";
+import { roundToDecimals, formatUnit } from "./util";
 import { useState } from "react";
 import { Box, BoxInput, BoxConsumption } from './Box';
 
@@ -56,7 +56,7 @@ function App() {
   const networkImpact = sourceValues["Transfert réseau"] * 1000 * 0.001 * MONTH_PER_YEAR;
   
   const totalElec: number = roundToDecimals(
-    (hddImpact + ssdImpact + cpuImpact + networkImpact) * PROVIDER_PUE[cloudProvider],
+    (hddImpact + ssdImpact + cpuImpact + networkImpact) * PROVIDER_PUE[cloudProvider] * 1000,
     1
   );
 
@@ -175,15 +175,14 @@ function App() {
 
         <Box title="Consommation totale" className="bg-green-50 border-green-200 col-span-3">
           <span className="text-4xl font-black text-green-800 geist-mono">
-            {totalElec}
-          </span>
-          <span className="text-green-700 font-semibold text-lg">
-            &nbsp;kWh / an
+            {formatUnit(totalElec, 'Wh/an', 1)}
           </span>
           <br />
           <span className="text-green-600">
             soit&nbsp;
-            <span className="font-semibold geist-mono">{co2Impact} kgCO2e</span>
+            <span className="font-semibold geist-mono">
+              {formatUnit(co2Impact, 'CO2e', 1)}
+            </span>
             &nbsp;émis par an
           </span>
         </Box>

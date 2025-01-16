@@ -1,4 +1,4 @@
-import { roundToDecimals } from "./util";
+import { formatUnit } from "./util";
 
 type BoxProps = {
   title: string;
@@ -53,7 +53,7 @@ export function BoxConsumption({ value }: BoxConsumptionProps) {
   return (
     <div className="flex items-center justify-between mt-4 pt-4 border-t">
       <span className="text-zinc-600">Consommation</span>
-      <span className="geist-mono">{roundToDecimals(value / 1000, 2)} kWh/an</span>
+      <span className="geist-mono">{formatUnit(value, 'Wh/an')}</span>
     </div>
   );
 } 
