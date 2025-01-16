@@ -17,16 +17,16 @@ const PROVIDER_PUE: Record<CloudProvider, number> = {
 // kW
 const CPU_POWER: Record<CloudProvider, { min: number; max: number }> = {
   AWS: {
-    min: 0.00074,
-    max: 0.00350
+    min: 0.74,
+    max: 3.50
   },
   GCP: {
-    min: 0.00071,
-    max: 0.00426
+    min: 0.71,
+    max: 4.26
   },
   Azure: {
-    min: 0.00078,
-    max: 0.00376
+    min: 0.78,
+    max: 3.76
   }
 };
 
@@ -46,17 +46,18 @@ function App() {
   const HOURS_PER_YEAR = 8760;
   const MONTH_PER_YEAR = 12;
 
-  const hddImpact = sourceValues["Stockage HDD"] * 0.00065 * HOURS_PER_YEAR;
-  const ssdImpact = sourceValues["Stockage SSD"] * 0.00120 * HOURS_PER_YEAR;
+  // Impacts are in W/year.
+  const hddImpact = sourceValues["Stockage HDD"] * 0.65 * HOURS_PER_YEAR;
+  const ssdImpact = sourceValues["Stockage SSD"] * 1.20 * HOURS_PER_YEAR;
   
   const cpuUtilization = sourceValues["Utilisation moyenne des vCPUs"] / 100;
   const cpuPower = CPU_POWER[cloudProvider].min + (CPU_POWER[cloudProvider].max - CPU_POWER[cloudProvider].min) * cpuUtilization;
   const cpuImpact = sourceValues["Nombre de vCPUs"] * cpuPower * HOURS_PER_YEAR;
   
-  const networkImpact = sourceValues["Transfert réseau"] * 1000 * 0.001 * MONTH_PER_YEAR;
+  const networkImpact = sourceValues["Transfert réseau"] * 1000 * MONTH_PER_YEAR;
   
   const totalElec: number = roundToDecimals(
-    (hddImpact + ssdImpact + cpuImpact + networkImpact) * PROVIDER_PUE[cloudProvider] * 1000,
+    (hddImpact + ssdImpact + cpuImpact + networkImpact) * PROVIDER_PUE[cloudProvider],
     1
   );
 
