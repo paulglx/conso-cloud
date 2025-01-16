@@ -8,6 +8,18 @@ import { roundToDecimals, formatUnit } from "./util";
 import { useState } from "react";
 import { Box, BoxInput, BoxConsumption } from './Box';
 
+const SOURCES = [
+  {
+    name: "Cloud Carbon Footprint",
+    url: "https://www.cloudcarbonfootprint.org/docs/methodology/#appendix-v-grid-emissions-factors",
+  },
+  {
+    name: "Greenly",
+    url: "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
+  },
+];
+
+
 const PROVIDER_PUE: Record<CloudProvider, number> = {
   AWS: 1.135,
   GCP: 1.1,
@@ -188,6 +200,23 @@ function App() {
           </span>
         </Box>
       </div>
+
+      <Box title="Sources" className="mt-6">
+        <ul className="space-y-2">
+          {SOURCES.map(source => (
+            <li key={source.url}>
+              <a 
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-600 hover:text-green-700 hover:underline"
+              >
+                {source.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Box>
     </div>
   );
 }
