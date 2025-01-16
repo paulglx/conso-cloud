@@ -119,6 +119,7 @@ export const REGIONS_BY_PROVIDER: Record<CloudProvider, Region[]> = {
   ],
 };
 
+// T of CO2/kWh
 export const CO2_INTENSITY: Record<CloudProvider, Record<string, number>> = {
   AWS: {
     'us-east-1': 0.000379069,
