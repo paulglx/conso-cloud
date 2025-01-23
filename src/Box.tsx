@@ -25,8 +25,8 @@ type BoxInputProps = {
   emoji?: string;
 };
 
-export function BoxInput({ label, value, unit, min, max, onChange, emoji }: BoxInputProps) {
-  const handleInputChange = (e) => {
+export function BoxInput({ label, value, unit, min, max, onChange }: BoxInputProps) {
+  const handleInputChange = (e: { target: { value: any; }; }) => {
     const newValue = Number(e.target.value);
     onChange(newValue); // Allow changing the value directly
   };
@@ -54,7 +54,7 @@ export function BoxInput({ label, value, unit, min, max, onChange, emoji }: BoxI
       <span>{unit}</span>
     </div>
   );
-}
+};
 
 type BoxConsumptionProps = {
   value: number;
