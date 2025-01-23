@@ -79,15 +79,16 @@ function App() {
   const networkImpact =
     sourceValues["Transfert réseau"] * 1000 * MONTH_PER_YEAR;
 
-  const totalElec: number = roundToDecimals(
-    (hddImpact + ssdImpact + cpuImpact + networkImpact) *
-      PROVIDER_PUE[cloudProvider],
-    1,
+  const totalElec: number = Number(
+    roundToDecimals(
+      (hddImpact + ssdImpact + cpuImpact + networkImpact) *
+        PROVIDER_PUE[cloudProvider],
+      1,
+    ),
   );
 
-  const co2Impact = roundToDecimals(
-    totalElec * CO2_INTENSITY[cloudProvider][region] * 1000,
-    1,
+  const co2Impact: number = Number(
+    roundToDecimals(totalElec * CO2_INTENSITY[cloudProvider][region] * 1000, 1),
   );
   /// End of computations ///
 
