@@ -17,6 +17,18 @@ const SOURCES = [
     name: "Greenly",
     url: "https://greenly.earth/en-gb/blog/ecology-news/what-is-the-carbon-footprint-of-data-storage",
   },
+  {
+    name: "carbone4",
+    url: "https://www.carbone4.com/en/analysis-faq-aviation-climate",
+  },
+  {
+    name: "Our World In Data",
+    url: "https://ourworldindata.org/food-choice-vs-eating-local",
+  },
+  {
+    name: "Our World In Data",
+    url: "https://ourworldindata.org/co2-emissions",
+  }
 ];
 
 
@@ -128,7 +140,7 @@ function App() {
           </div>
         </Box>
 
-        <Box title="Compute">
+        <Box title="Calcul">
           <div className="space-y-6">
             <BoxInput
               label="Nombre"
@@ -206,7 +218,7 @@ function App() {
               <div className="flex-1">
                 <div className="h-6 flex rounded-full overflow-hidden relative">
                   {[
-                    { value: cpuImpact, color: 'bg-blue-200', label: 'CPU' },
+                    { value: cpuImpact, color: 'bg-blue-200', label: 'Calcul' },
                     { value: hddImpact, color: 'bg-yellow-200', label: 'HDD' },
                     { value: ssdImpact, color: 'bg-orange-200', label: 'SSD' },
                     { value: networkImpact, color: 'bg-purple-200', label: 'Réseau' },
@@ -230,6 +242,97 @@ function App() {
                 </div>
               </div>
             )}
+          </div>
+        </Box>
+
+        <Box title="Équivalences" className="col-span-3">
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <h4 className="font-semibold mb-3">Transports</h4>
+              <div className="grid grid-cols-4 gap-4">
+                {/* in g CO2eq / km */}
+                {[
+                  { mode: "Voiture diesel", emission: 109, icon: "🚗" },
+                  { mode: "Voiture électrique", emission: 51, icon: "🔌" },
+                  { mode: "Avion", emission: 264, icon: "✈️" },
+                  { mode: "TGV", emission: 10, icon: "🚄" },
+                ].map((transport) => {
+                  const kmEquivalent = roundToDecimals(co2Impact / transport.emission, 0);
+                  return (
+                    <div key={transport.mode} className="text-center p-4 bg-zinc-100 rounded-lg">
+                      <div className="text-2xl mb-2">{transport.icon}</div>
+                      <div className="text-sm text-zinc-600">{transport.mode}</div>
+                      <div className="font-bold text-lg mt-1">
+                        {kmEquivalent} km
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        ({transport.emission} gCO2e/km)
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-2 text-xs text-zinc-500">
+                * Inclut la fabrication et l'usage. Pour les voitures, moyenne de 2 personnes par véhicule.
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Alimentation</h4>
+              <div className="grid grid-cols-4 gap-4">
+                {/* in kg CO2eq / kg */}
+                {[
+                  { mode: "Boeuf", emission: 60, icon: "🥩" },
+                  { mode: "Agneau", emission: 24, icon: "🐑" },
+                  { mode: "Poulet", emission: 6, icon: "🍗" },
+                  { mode: "Pommes", emission: 0.400, icon: "🍎" },
+                ].map((food) => {
+                  const kgEquivalent = roundToDecimals(co2Impact / (food.emission * 1000), 1);
+                  return (
+                    <div key={food.mode} className="text-center p-4 bg-zinc-100 rounded-lg">
+                      <div className="text-2xl mb-2">{food.icon}</div>
+                      <div className="text-sm text-zinc-600">{food.mode}</div>
+                      <div className="font-bold text-lg mt-1">
+                        {kgEquivalent} kg
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        ({food.emission} kgCO2e/kg)
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-2 text-xs text-zinc-500">
+                Inclut la production, transformation et transport.
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Émissions de CO2 par personne</h4>
+              <div className="grid grid-cols-4 gap-4">
+                {/* in T CO2eq / year */}
+                {[
+                  { country: "UE", emission: 5.600, icon: "🇪🇺" },
+                  { country: "USA", emission: 14.300, icon: "🇺🇸" },
+                  { country: "Kenya", emission: 0.400, icon: "🇰🇪" },
+                  { country: "Inde", emission: 2.100, icon: "🇮🇳" },
+                ].map((country) => {
+                  const equivalent = roundToDecimals(co2Impact / (country.emission * 1000 * 1000), 3);
+                  return (
+                    <div key={country.country} className="text-center p-4 bg-zinc-100 rounded-lg">
+                      <div className="text-2xl mb-2">{country.icon}</div>
+                      <div className="text-sm text-zinc-600">{country.country}</div>
+                      <div className="font-bold text-lg mt-1">
+                        {equivalent}                      
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        ({country.emission} TCO2e/personne/an)
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </Box>
       </div>
