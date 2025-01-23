@@ -25,9 +25,17 @@ type BoxInputProps = {
   emoji?: string;
 };
 
-export function BoxInput({ label, value, unit, min, max, onChange }: BoxInputProps) {
-  const handleInputChange = (e: { target: { value: any; }; }) => {
-    const newValue = Number(e.target.value);
+export function BoxInput({
+  label,
+  value,
+  unit,
+  min,
+  max,
+  onChange,
+  emoji,
+}: BoxInputProps) {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = Number(e.target?.value);
     onChange(newValue); // Allow changing the value directly
   };
 
@@ -54,7 +62,7 @@ export function BoxInput({ label, value, unit, min, max, onChange }: BoxInputPro
       <span>{unit}</span>
     </div>
   );
-};
+}
 
 type BoxConsumptionProps = {
   value: number;
@@ -64,7 +72,7 @@ export function BoxConsumption({ value }: BoxConsumptionProps) {
   return (
     <div className="flex items-center justify-between mt-4 pt-4 border-t">
       <span className="text-zinc-600">Consommation</span>
-      <span className="geist-mono">{formatUnit(value, 'Wh/an')}</span>
+      <span className="geist-mono">{formatUnit(value, "Wh/an")}</span>
     </div>
   );
-} 
+}
