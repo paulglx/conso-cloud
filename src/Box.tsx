@@ -22,17 +22,29 @@ type BoxInputProps = {
   min: number;
   max: number;
   onChange: (value: number) => void;
+  emoji?: string;
 };
 
-export function BoxInput({ label, value, unit, min, max, onChange }: BoxInputProps) {
+export function BoxInput({
+  label,
+  value,
+  unit,
+  min,
+  max,
+  onChange,
+  emoji,
+}: BoxInputProps) {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = Number(e.target?.value);
+    onChange(newValue); // Allow changing the value directly
+  };
+
   return (
-    <div>
-      <div className="flex items-center justify-between mt-4">
-        <span className="text-zinc-600">{label}</span>
-        <span className="text-lg geist-mono">
-          <span className="font-bold">{value}</span> {unit}
-        </span>
-      </div>
+    <div className="flex items-center">
+      <label className="flex items-center">
+        {emoji && <span className="text-2xl mr-2">{emoji}</span>}
+        {label}
+      </label>
       <input
         type="range"
         value={value}
@@ -41,6 +53,13 @@ export function BoxInput({ label, value, unit, min, max, onChange }: BoxInputPro
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none my-3"
       />
+      <input
+        type="number"
+        value={value}
+        onChange={handleInputChange}
+        className="ml-2 w-16 p-1 border border-zinc-200 rounded"
+      />
+      <span>{unit}</span>
     </div>
   );
 }
@@ -53,7 +72,7 @@ export function BoxConsumption({ value }: BoxConsumptionProps) {
   return (
     <div className="flex items-center justify-between mt-4 pt-4 border-t">
       <span className="text-zinc-600">Consommation</span>
-      <span className="geist-mono">{formatUnit(value, 'Wh/an')}</span>
+      <span className="geist-mono">{formatUnit(value, "Wh/an")}</span>
     </div>
   );
-} 
+}
