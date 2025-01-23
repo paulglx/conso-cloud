@@ -9,7 +9,6 @@ import { roundToDecimals, formatUnit } from "./util";
 import { useState } from "react";
 import { Box, BoxInput, BoxConsumption } from "./Box";
 import {
-  CloseButton,
   Listbox,
   ListboxButton,
   ListboxOption,
