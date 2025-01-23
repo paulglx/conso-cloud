@@ -11,7 +11,7 @@ import { Box, BoxInput, BoxConsumption } from './Box';
 const SOURCES = [
   {
     name: "Cloud Carbon Footprint",
-    url: "https://www.cloudcarbonfootprint.org/docs/methodology/#appendix-v-grid-emissions-factors",
+    url: "https://www.cloudcarbonfootprint.org/docs/methodology",
   },
   {
     name: "Greenly",
@@ -187,17 +187,50 @@ function App() {
         </Box>
 
         <Box title="Consommation totale" className="bg-green-50 border-green-200 col-span-3">
-          <span className="text-4xl font-black text-green-800 geist-mono">
-            {formatUnit(totalElec, 'Wh/an', 1)}
-          </span>
-          <br />
-          <span className="text-green-600">
-            soit&nbsp;
-            <span className="font-semibold geist-mono">
-              {formatUnit(co2Impact, 'CO2e', 1)}
-            </span>
-            &nbsp;émis par an
-          </span>
+          <div className="flex items-center gap-8">
+            <div>
+              <span className="text-4xl font-black text-green-800 geist-mono">
+                {formatUnit(totalElec, 'Wh/an', 1)}
+              </span>
+              <br />
+              <span className="text-green-600">
+                soit&nbsp;
+                <span className="font-semibold geist-mono">
+                  {formatUnit(co2Impact, 'CO2e', 1)}
+                </span>
+                &nbsp;émis par an
+              </span>
+            </div>
+
+            {totalElec > 0 && (
+              <div className="flex-1">
+                <div className="h-6 flex rounded-full overflow-hidden relative">
+                  {[
+                    { value: cpuImpact, color: 'bg-blue-200', label: 'CPU' },
+                    { value: hddImpact, color: 'bg-yellow-200', label: 'HDD' },
+                    { value: ssdImpact, color: 'bg-orange-200', label: 'SSD' },
+                    { value: networkImpact, color: 'bg-purple-200', label: 'Réseau' },
+                  ].map((component, i) => {
+                    const percentage = (component.value * 100) / (totalElec / PROVIDER_PUE[cloudProvider]);
+                    if (percentage < 1) return null;
+                    return (
+                      <div
+                        key={i}
+                        className={`${component.color} h-full flex items-center justify-center text-xs font-medium relative`}
+                        style={{ width: `${percentage}%` }}
+                      >
+                        {percentage >= 10 && (
+                          <span className="text-black z-10">
+                            {component.label} {roundToDecimals(percentage, 1)}%
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         </Box>
       </div>
 
