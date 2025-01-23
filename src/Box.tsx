@@ -25,18 +25,15 @@ type BoxInputProps = {
   emoji?: string;
 };
 
-export function BoxInput({ label, value, unit, min, max, onChange, emoji }: BoxInputProps) {
-  const handleInputChange = (e) => {
+export function BoxInput({ label, value, unit, min, max, onChange }: BoxInputProps) {
+  const handleInputChange = (e: { target: { value: any; }; }) => {
     const newValue = Number(e.target.value);
     onChange(newValue); // Allow changing the value directly
   };
 
   return (
     <div className="flex items-center">
-      <label className="flex items-center">
-        {emoji && <span className="text-2xl mr-2">{emoji}</span>}
-        {label}
-      </label>
+      <label>{label}</label>
       <input
         type="range"
         value={value}
@@ -54,7 +51,7 @@ export function BoxInput({ label, value, unit, min, max, onChange, emoji }: BoxI
       <span>{unit}</span>
     </div>
   );
-}
+};
 
 type BoxConsumptionProps = {
   value: number;
