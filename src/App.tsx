@@ -1,8 +1,19 @@
-import { CO2_INTENSITY, CloudProvider, REGIONS_BY_PROVIDER } from "./Data";
+import {
+  CO2_INTENSITY,
+  CloudProvider,
+  REGIONS_BY_PROVIDER,
+  Region,
+} from "./Data";
 
 import { roundToDecimals, formatUnit } from "./util";
 import { useState } from "react";
 import { Box, BoxInput, BoxConsumption } from "./Box";
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 
 const SOURCES = [
   {
@@ -51,7 +62,7 @@ const CPU_POWER: Record<CloudProvider, { min: number; max: number }> = {
 
 function App() {
   const [cloudProvider, setCloudProvider] = useState<CloudProvider>("AWS");
-  const [region, setRegion] = useState<string>(REGIONS_BY_PROVIDER.AWS[0].id);
+  const [region, setRegion] = useState<Region>(REGIONS_BY_PROVIDER.AWS[0]);
 
   const [sourceValues, setSourceValues] = useState<Record<string, number>>({
     "Nombre de vCPUs": 0,
@@ -88,7 +99,10 @@ function App() {
   );
 
   const co2Impact: number = Number(
-    roundToDecimals(totalElec * CO2_INTENSITY[cloudProvider][region] * 1000, 1),
+    roundToDecimals(
+      totalElec * CO2_INTENSITY[cloudProvider][region.id] * 1000,
+      1,
+    ),
   );
   /// End of computations ///
 
@@ -98,9 +112,39 @@ function App() {
 
   const handleProviderChange = (newProvider: CloudProvider) => {
     setCloudProvider(newProvider);
-    setRegion(REGIONS_BY_PROVIDER[newProvider][0].id);
+    setRegion(REGIONS_BY_PROVIDER[newProvider][0]);
   };
 
+  const getIntensityColor = (intensity: number) => {
+    // Ensure intensity is between 0 and 1
+    const clampedIntensity = Math.max(0, Math.min(1, intensity * 1000));
+
+    // Keep a consistent intensity level (600 gives good visibility)
+    const level = 600;
+
+    // For first third (0-0.33): green to yellow
+    if (clampedIntensity <= 0.33) {
+      // Normalize within this range (0-0.33 becomes 0-1)
+      const normalizedValue = clampedIntensity * 3;
+      return normalizedValue <= 0.5
+        ? `text-green-${level}`
+        : `text-lime-${level}`;
+    }
+    // For middle third (0.34-0.66): yellow range
+    else if (clampedIntensity <= 0.66) {
+      const normalizedValue = (clampedIntensity - 0.33) * 3;
+      return normalizedValue <= 0.5
+        ? `text-yellow-${level}`
+        : `text-amber-${level}`;
+    }
+    // For final third (0.67-1.0): orange to red
+    else {
+      const normalizedValue = (clampedIntensity - 0.66) * 3;
+      return normalizedValue <= 0.5
+        ? `text-orange-${level}`
+        : `text-red-${level}`;
+    }
+  };
   return (
     <div className="mx-32 my-24">
       <Box title="Calculateur de Consommation" className="px-12 py-10">
@@ -110,17 +154,30 @@ function App() {
       </Box>
       <div className="grid grid-cols-3 gap-6 mt-6">
         <Box title="Cloud Provider">
-          <select
+          <Listbox
             value={cloudProvider}
-            onChange={(e) =>
-              handleProviderChange(e.target.value as CloudProvider)
-            }
-            className="mt-2 w-full p-2 rounded border border-zinc-200"
+            onChange={(cp: CloudProvider) => handleProviderChange(cp)}
+            as="div"
+            className="w-full py-2"
           >
-            <option value="AWS">AWS</option>
-            <option value="GCP">GCP</option>
-            <option value="Azure">Azure</option>
-          </select>
+            <ListboxButton className="bg-white px-3 py-1.5 border rounded w-full text-left">
+              {cloudProvider}
+            </ListboxButton>
+            <ListboxOptions
+              anchor="bottom start"
+              className={`bg-white border rounded text-left min-w-56 z-20 [--anchor-gap:4px]`}
+            >
+              {["AWS", "GCP", "Azure"].map((cp) => (
+                <ListboxOption
+                  key={cp}
+                  value={cp}
+                  className={`cursor-pointer px-2 py-1 m-1 rounded hover:bg-gray-50 ${cp === cloudProvider ? "text-blue-600 bg-blue-50" : ""}`}
+                >
+                  {cp}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Listbox>
           <div className="flex items-center justify-between">
             <span className="geist-mono">
               {PROVIDER_PUE[cloudProvider]} &nbsp;PUE
@@ -129,20 +186,46 @@ function App() {
         </Box>
 
         <Box title="Region">
-          <select
+          <Listbox
             value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            className="mt-2 w-full p-2 rounded border border-zinc-200"
+            onChange={(r) => setRegion(r)}
+            as="div"
+            className="w-full py-2"
           >
-            {REGIONS_BY_PROVIDER[cloudProvider].map((region) => (
-              <option key={region.id} value={region.id}>
-                {region.name}
-              </option>
-            ))}
-          </select>
+            <ListboxButton className="bg-white px-3 py-1.5 border rounded w-full text-left">
+              {region.name}
+            </ListboxButton>
+            <ListboxOptions
+              anchor="bottom start"
+              className={`bg-white border rounded text-left z-20 [--anchor-gap:4px]`}
+            >
+              {REGIONS_BY_PROVIDER[cloudProvider].map((r) => (
+                <ListboxOption
+                  key={r.id}
+                  value={r}
+                  className={`cursor-pointer px-2 py-1 m-1 rounded hover:bg-gray-50 ${r.id === region.id ? "text-blue-600 bg-blue-50" : ""}`}
+                >
+                  <div className="flex items-center justify-between">
+                    {r.name}
+                    <span
+                      className={`ms-4 rounded-full ${getIntensityColor(CO2_INTENSITY[cloudProvider][r.id])}`}
+                    >
+                      <span className="text-xs geist-mono">
+                        {roundToDecimals(
+                          CO2_INTENSITY[cloudProvider][r.id] * 1000,
+                          2,
+                        )}
+                      </span>
+                      &nbsp;●
+                    </span>
+                  </div>
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Listbox>
           <div className="flex items-center justify-between">
             <span className="geist-mono">
-              {(CO2_INTENSITY[cloudProvider][region] * 1000).toFixed(2)}{" "}
+              {(CO2_INTENSITY[cloudProvider][region.id] * 1000).toFixed(2)}{" "}
               &nbsp;kgCO2e/kWh
             </span>
           </div>
