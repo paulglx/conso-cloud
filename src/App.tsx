@@ -182,7 +182,7 @@ function App() {
             </ListboxButton>
             <ListboxOptions
               anchor="bottom start"
-              className={`bg-white border rounded text-left min-w-56 z-20 [--anchor-gap:4px]`}
+              className={`bg-white border rounded text-left z-20 [--anchor-gap:4px]`}
             >
               {REGIONS_BY_PROVIDER[cloudProvider].map((r) => (
                 <ListboxOption
@@ -193,9 +193,15 @@ function App() {
                   <div className="flex items-center justify-between">
                     {r.name}
                     <span
-                      className={`ms-2 rounded-full ${getIntensityColor(CO2_INTENSITY[cloudProvider][r.id])}`}
+                      className={`ms-4 rounded-full ${getIntensityColor(CO2_INTENSITY[cloudProvider][r.id])}`}
                     >
-                      ●
+                      <span className="text-xs geist-mono">
+                        {roundToDecimals(
+                          CO2_INTENSITY[cloudProvider][r.id] * 1000,
+                          2,
+                        )}
+                      </span>
+                      &nbsp;●
                     </span>
                   </div>
                 </ListboxOption>
