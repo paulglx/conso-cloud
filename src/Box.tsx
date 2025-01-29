@@ -50,14 +50,14 @@ export function BoxInput({
         value={value}
         min={min}
         max={max}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-gray-200 rounded-lg appearance-none my-3"
+        onChange={handleInputChange}
+        className="w-full h-2 bg-gray-200 rounded-lg appearance-none my-3 ms-2"
       />
       <input
         type="number"
         value={value}
         onChange={handleInputChange}
-        className="ml-2 w-16 p-1 border border-zinc-200 rounded"
+        className="ms-2 me-1 w-14 px-1 border border-zinc-200 rounded"
       />
       <span>{unit}</span>
     </div>
