@@ -115,21 +115,36 @@ function App() {
     setRegion(REGIONS_BY_PROVIDER[newProvider][0]);
   };
 
-  const getIntensityColor = (
-    intensity: number,
-    thresholds = { low: 0.4, high: 0.75 },
-  ) => {
-    const normalizedIntensity = intensity * 1000;
+  const getIntensityColor = (intensity: number) => {
+    // Ensure intensity is between 0 and 1
+    const clampedIntensity = Math.max(0, Math.min(1, intensity * 1000));
 
-    if (normalizedIntensity <= thresholds.low) {
-      return "text-green-600";
-    } else if (normalizedIntensity <= thresholds.high) {
-      return "text-yellow-500";
-    } else {
-      return "text-red-600";
+    // Keep a consistent intensity level (600 gives good visibility)
+    const level = 600;
+
+    // For first third (0-0.33): green to yellow
+    if (clampedIntensity <= 0.33) {
+      // Normalize within this range (0-0.33 becomes 0-1)
+      const normalizedValue = clampedIntensity * 3;
+      return normalizedValue <= 0.5
+        ? `text-green-${level}`
+        : `text-lime-${level}`;
+    }
+    // For middle third (0.34-0.66): yellow range
+    else if (clampedIntensity <= 0.66) {
+      const normalizedValue = (clampedIntensity - 0.33) * 3;
+      return normalizedValue <= 0.5
+        ? `text-yellow-${level}`
+        : `text-amber-${level}`;
+    }
+    // For final third (0.67-1.0): orange to red
+    else {
+      const normalizedValue = (clampedIntensity - 0.66) * 3;
+      return normalizedValue <= 0.5
+        ? `text-orange-${level}`
+        : `text-red-${level}`;
     }
   };
-
   return (
     <div className="mx-32 my-24">
       <Box title="Calculateur de Consommation" className="px-12 py-10">
