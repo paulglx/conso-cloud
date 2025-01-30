@@ -137,6 +137,10 @@ function App() {
   );
   /// End of computations ///
 
+  const maxGpuIdle: number =
+    GPU_MODELS.map((gpu) => gpu.idle).reduce((a, b) => a + b) /
+    GPU_MODELS.length;
+
   const handleSourceChange = (title: string, value: number) => {
     setSourceValues((prev) => ({ ...prev, [title]: value }));
   };
@@ -310,6 +314,10 @@ function App() {
               anchor="bottom start"
               className={`bg-white border rounded text-left z-20 [--anchor-gap:4px]`}
             >
+              <div className="px-2 py-1 bg-gray-50 m-1 rounded text-gray-500 flex items-center justify-between">
+                <span>GPU Model</span>
+                <span className="text-xs">Power : Idle · Max</span>
+              </div>
               {GPU_MODELS.map((gpu) => (
                 <ListboxOption
                   key={gpu.name}
@@ -319,7 +327,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     {gpu.name}
                     <span
-                      className={`ms-8 rounded-full ${getIntensityColor(gpu.idle, 0, 35, true)}`}
+                      className={`ms-8 rounded-full ${getIntensityColor(gpu.idle, 0, maxGpuIdle, true)}`}
                     >
                       <span className="text-xs geist-mono">
                         {gpu.idle}W · {gpu.max}W
