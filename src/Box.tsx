@@ -8,7 +8,9 @@ type BoxProps = {
 
 export function Box({ title, children, className = "" }: BoxProps) {
   return (
-    <div className={`w-full bg-zinc-50 border p-10 rounded-xl ${className}`}>
+    <div
+      className={`w-full bg-zinc-50 border p-6 md:p-10 rounded-xl ${className}`}
+    >
       <h3 className="text-lg text-zinc-800 font-bold">{title}</h3>
       {children}
     </div>
