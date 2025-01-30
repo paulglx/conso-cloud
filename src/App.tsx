@@ -146,13 +146,16 @@ function App() {
     }
   };
   return (
-    <div className="mx-32 my-24">
-      <Box title="Calculateur de Consommation" className="px-12 py-10">
+    <div className="mx-4 sm:mx-8 md:mx-16 lg:mx-32 my-6 md:my-24">
+      <Box
+        title="Calculateur de Consommation"
+        className="px-6 sm:px-8 md:px-10 py-10"
+      >
         <h2 className="text-lg font-semibold text-zinc-500">
           Quelle conso pour mon cloud ?
         </h2>
       </Box>
-      <div className="grid grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         <Box title="Cloud Provider">
           <Listbox
             value={cloudProvider}
@@ -293,15 +296,15 @@ function App() {
 
         <Box
           title="Consommation totale"
-          className="bg-green-100 border-green-300 col-span-3"
+          className="!bg-green-50 border-green-300 col-span-1 sm:col-span-2 lg:col-span-3"
         >
-          <div className="flex items-center gap-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8">
             <div>
-              <span className="text-4xl font-black text-green-800 geist-mono">
+              <span className="text-2xl md:text-4xl font-black text-green-800 geist-mono">
                 {formatUnit(totalElec, "Wh/an", 1)}
               </span>
               <br />
-              <span className="text-green-600">
+              <span className=" text-green-600">
                 soit&nbsp;
                 <span className="font-semibold geist-mono">
                   {formatUnit(co2Impact, "CO2e", 1)}
@@ -311,8 +314,8 @@ function App() {
             </div>
 
             {totalElec > 0 && (
-              <div className="flex-1">
-                <div className="h-6 flex rounded-full overflow-hidden relative ring-4 ring-white">
+              <div className="flex-1 w-full">
+                <div className="h-6 flex rounded-full text-center overflow-hidden relative ring-4 ring-white">
                   {[
                     { value: cpuImpact, color: "bg-blue-200", label: "Calcul" },
                     { value: hddImpact, color: "bg-yellow-200", label: "HDD" },
@@ -347,7 +350,10 @@ function App() {
           </div>
         </Box>
 
-        <Box title="Équivalences" className="col-span-3">
+        <Box
+          title="Équivalences"
+          className="col-span-1 sm:col-span-2 lg:col-span-3"
+        >
           <div className="grid grid-cols-1 gap-6">
             <div>
               <h4 className="font-semibold mb-3">Transports</h4>
