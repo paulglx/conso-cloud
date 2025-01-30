@@ -11,6 +11,7 @@ export const GPU_MODELS = [
   { name: "NVIDIA K520", idle: 26, max: 229 },
   { name: "NVIDIA T4", idle: 8, max: 71 },
   { name: "NVIDIA Tesla A100", idle: 46, max: 407 },
+  { name: "NVIDIA Tesla H100", idle: 160, max: 700 },
   { name: "NVIDIA Tesla K80", idle: 35, max: 306 },
   { name: "NVIDIA Tesla M60", idle: 35, max: 306 },
   { name: "NVIDIA Tesla P100", idle: 36, max: 306 },
