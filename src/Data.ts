@@ -5,6 +5,22 @@ export type Region = {
   name: string;
 };
 
+export const GPU_MODELS = [
+  { name: "AMD Radeon Pro V520", idle: 26, max: 229 },
+  { name: "NVIDIA A10G", idle: 18, max: 153 },
+  { name: "NVIDIA K520", idle: 26, max: 229 },
+  { name: "NVIDIA T4", idle: 8, max: 71 },
+  { name: "NVIDIA Tesla A100", idle: 46, max: 407 },
+  { name: "NVIDIA Tesla H100", idle: 160, max: 700 },
+  { name: "NVIDIA Tesla K80", idle: 35, max: 306 },
+  { name: "NVIDIA Tesla M60", idle: 35, max: 306 },
+  { name: "NVIDIA Tesla P100", idle: 36, max: 306 },
+  { name: "NVIDIA Tesla P4", idle: 9, max: 76.5 },
+  { name: "NVIDIA Tesla P40", idle: 30, max: 255 },
+  { name: "NVIDIA Tesla V100", idle: 35, max: 306 },
+  { name: "Xilinx Alveo U250", idle: 27, max: 229.5 },
+];
+
 export const REGIONS_BY_PROVIDER: Record<CloudProvider, Region[]> = {
   AWS: [
     { id: "us-east-1", name: "US East (N. Virginia)" },

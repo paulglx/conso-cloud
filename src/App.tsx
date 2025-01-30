@@ -1,5 +1,6 @@
 import {
   CO2_INTENSITY,
+  GPU_MODELS,
   CloudProvider,
   REGIONS_BY_PROVIDER,
   Region,
@@ -77,6 +78,15 @@ function App() {
     Mémoire: 0,
   });
 
+  const [selectedGpu, setSelectedGpu] = useState<string>(GPU_MODELS[0].name);
+  const [gpuValues, setGpuValues] = useState<{
+    units: number;
+    utilization: number;
+  }>({
+    units: 0,
+    utilization: 0,
+  });
+
   /// Computations ///
   const HOURS_PER_YEAR = 8760;
   const MONTH_PER_YEAR = 12;
@@ -96,9 +106,24 @@ function App() {
   const networkImpact =
     sourceValues["Transfert réseau"] * 1000 * MONTH_PER_YEAR;
 
+  const { units, utilization } = gpuValues;
+  const gpuModel = GPU_MODELS.find((model) => model.name === selectedGpu);
+
+  let gpuImpact = 0;
+  if (gpuModel) {
+    const power =
+      gpuModel.idle + (gpuModel.max - gpuModel.idle) * (utilization / 100);
+    gpuImpact = power * units * HOURS_PER_YEAR;
+  }
+
   const totalElec: number = Number(
     roundToDecimals(
-      (hddImpact + ssdImpact + cpuImpact + networkImpact + memoryImpact) *
+      (hddImpact +
+        ssdImpact +
+        cpuImpact +
+        networkImpact +
+        memoryImpact +
+        gpuImpact) *
         PROVIDER_PUE[cloudProvider],
       1,
     ),
@@ -112,6 +137,10 @@ function App() {
   );
   /// End of computations ///
 
+  const maxGpuIdle: number =
+    GPU_MODELS.map((gpu) => gpu.idle).reduce((a, b) => a + b) /
+    GPU_MODELS.length;
+
   const handleSourceChange = (title: string, value: number) => {
     setSourceValues((prev) => ({ ...prev, [title]: value }));
   };
@@ -121,38 +150,45 @@ function App() {
     setRegion(REGIONS_BY_PROVIDER[newProvider][0]);
   };
 
-  const getIntensityColor = (intensity: number) => {
-    // Ensure intensity is between 0 and 1
-    const clampedIntensity = Math.max(0, Math.min(1, intensity * 1000));
+  const getIntensityColor = (
+    value: number,
+    min: number = 0,
+    max: number = 1,
+    higherIsBetter: boolean = false,
+  ) => {
+    // Normalize value between 0 and 1
+    let normalizedValue = (value - min) / (max - min);
 
-    // Keep a consistent intensity level (600 gives good visibility)
+    // If higher values are worse, invert the scale
+    if (!higherIsBetter) {
+      normalizedValue = 1 - normalizedValue;
+    }
+
+    // Clamp between 0 and 1
+    normalizedValue = Math.max(0, Math.min(1, normalizedValue));
+
+    // Keep a consistent intensity level
     const level = 600;
 
     // For first third (0-0.33): green to yellow
-    if (clampedIntensity <= 0.33) {
+    if (normalizedValue <= 0.33) {
       // Normalize within this range (0-0.33 becomes 0-1)
-      const normalizedValue = clampedIntensity * 3;
-      return normalizedValue <= 0.5
-        ? `text-green-${level}`
-        : `text-lime-${level}`;
+      const rangeValue = normalizedValue * 3;
+      return rangeValue <= 0.5 ? `text-green-${level}` : `text-lime-${level}`;
     }
     // For middle third (0.34-0.66): yellow range
-    else if (clampedIntensity <= 0.66) {
-      const normalizedValue = (clampedIntensity - 0.33) * 3;
-      return normalizedValue <= 0.5
-        ? `text-yellow-${level}`
-        : `text-amber-${level}`;
+    else if (normalizedValue <= 0.66) {
+      const rangeValue = (normalizedValue - 0.33) * 3;
+      return rangeValue <= 0.5 ? `text-yellow-${level}` : `text-amber-${level}`;
     }
     // For final third (0.67-1.0): orange to red
     else {
-      const normalizedValue = (clampedIntensity - 0.66) * 3;
-      return normalizedValue <= 0.5
-        ? `text-orange-${level}`
-        : `text-red-${level}`;
+      const rangeValue = (normalizedValue - 0.66) * 3;
+      return rangeValue <= 0.5 ? `text-orange-${level}` : `text-red-${level}`;
     }
   };
   return (
-    <div className="mx-4 sm:mx-8 md:mx-16 lg:mx-32 my-6 md:my-24">
+    <div className="mx-4 sm:mx-8 md:mx-16 lg:mx-24 my-6 md:my-24">
       <Box
         title="Calculateur de Consommation"
         className="px-6 sm:px-8 md:px-10 py-10"
@@ -161,7 +197,7 @@ function App() {
           Quelle conso pour mon cloud ?
         </h2>
       </Box>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
         <Box title="Cloud Provider">
           <Listbox
             value={cloudProvider}
@@ -217,7 +253,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     {r.name}
                     <span
-                      className={`ms-4 rounded-full ${getIntensityColor(CO2_INTENSITY[cloudProvider][r.id])}`}
+                      className={`ms-4 rounded-full ${getIntensityColor(CO2_INTENSITY[cloudProvider][r.id] * 1000, 0, 1, true)}`}
                     >
                       <span className="text-xs geist-mono">
                         {roundToDecimals(
@@ -240,7 +276,7 @@ function App() {
           </div>
         </Box>
 
-        <Box title="Calcul">
+        <Box title="CPUs">
           <div className="space-y-6">
             <BoxInput
               label="Nombre"
@@ -262,6 +298,68 @@ function App() {
             />
           </div>
           <BoxConsumption value={cpuImpact} />
+        </Box>
+
+        <Box title="GPUs">
+          <Listbox
+            value={selectedGpu}
+            onChange={(gpu) => setSelectedGpu(gpu)}
+            as="div"
+            className="w-full py-2"
+          >
+            <ListboxButton className="bg-white px-3 py-1.5 border rounded w-full text-left">
+              {selectedGpu}
+            </ListboxButton>
+            <ListboxOptions
+              anchor="bottom start"
+              className={`bg-white border rounded text-left z-20 [--anchor-gap:4px]`}
+            >
+              <div className="px-2 py-1 bg-gray-50 m-1 rounded text-gray-500 flex items-center justify-between">
+                <span>GPU Model</span>
+                <span className="text-xs">Power : Idle · Max</span>
+              </div>
+              {GPU_MODELS.map((gpu) => (
+                <ListboxOption
+                  key={gpu.name}
+                  value={gpu.name}
+                  className={`cursor-pointer px-2 py-1 m-1 rounded hover:bg-gray-50 ${gpu.name === selectedGpu ? "text-blue-600 bg-blue-50" : ""}`}
+                >
+                  <div className="flex items-center justify-between">
+                    {gpu.name}
+                    <span
+                      className={`ms-8 rounded-full ${getIntensityColor(gpu.idle, 0, maxGpuIdle, true)}`}
+                    >
+                      <span className="text-xs geist-mono">
+                        {gpu.idle}W · {gpu.max}W
+                      </span>
+                    </span>
+                  </div>
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Listbox>
+
+          <BoxInput
+            label={`Nombre`}
+            value={gpuValues.units}
+            unit="unités"
+            min={0}
+            max={5}
+            onChange={(value) =>
+              setGpuValues((prev) => ({ ...prev, units: value }))
+            }
+          />
+          <BoxInput
+            label={`Utilisation moyenne`}
+            value={gpuValues.utilization}
+            unit="%"
+            min={0}
+            max={100}
+            onChange={(value) =>
+              setGpuValues((prev) => ({ ...prev, utilization: value }))
+            }
+          />
+          <BoxConsumption value={gpuImpact} />
         </Box>
 
         <Box title="Stockage HDD">
@@ -314,7 +412,7 @@ function App() {
 
         <Box
           title="Consommation totale"
-          className="!bg-green-50 border-green-300 col-span-1 sm:col-span-2 lg:col-span-3"
+          className="!bg-green-50 border-green-300 col-span-1 sm:col-span-2"
         >
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8">
             <div>
@@ -348,6 +446,7 @@ function App() {
                       color: "bg-green-200",
                       label: "Mémoire",
                     },
+                    { value: gpuImpact, color: "bg-gray-200", label: "GPU" },
                   ].map((component, i) => {
                     const percentage =
                       (component.value * 100) /
@@ -373,10 +472,7 @@ function App() {
           </div>
         </Box>
 
-        <Box
-          title="Équivalences"
-          className="col-span-1 sm:col-span-2 lg:col-span-3"
-        >
+        <Box title="Équivalences" className="col-span-1 sm:col-span-2">
           <div className="grid grid-cols-1 gap-6">
             <div>
               <h4 className="font-semibold mb-3">Transports</h4>
