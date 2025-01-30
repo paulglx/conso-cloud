@@ -70,6 +70,7 @@ function App() {
     "Stockage HDD": 0,
     "Stockage SSD": 0,
     "Transfert réseau": 0,
+    "Mémoire": 0,
   });
 
   /// Computations ///
@@ -79,12 +80,13 @@ function App() {
   // Impacts are in W/year.
   const hddImpact = sourceValues["Stockage HDD"] * 0.65 * HOURS_PER_YEAR;
   const ssdImpact = sourceValues["Stockage SSD"] * 1.2 * HOURS_PER_YEAR;
+  const memoryImpact = sourceValues["Mémoire"] * 0.392 * HOURS_PER_YEAR;
 
   const cpuUtilization = sourceValues["Utilisation moyenne des vCPUs"] / 100;
   const cpuPower =
     CPU_POWER[cloudProvider].min +
     (CPU_POWER[cloudProvider].max - CPU_POWER[cloudProvider].min) *
-      cpuUtilization;
+    cpuUtilization;
   const cpuImpact = sourceValues["Nombre de vCPUs"] * cpuPower * HOURS_PER_YEAR;
 
   const networkImpact =
@@ -92,8 +94,8 @@ function App() {
 
   const totalElec: number = Number(
     roundToDecimals(
-      (hddImpact + ssdImpact + cpuImpact + networkImpact) *
-        PROVIDER_PUE[cloudProvider],
+      (hddImpact + ssdImpact + cpuImpact + networkImpact + memoryImpact) *
+      PROVIDER_PUE[cloudProvider],
       1,
     ),
   );
@@ -282,6 +284,18 @@ function App() {
           <BoxConsumption value={ssdImpact} />
         </Box>
 
+        <Box title="Mémoire">
+          <BoxInput
+            label="Volume"
+            value={sourceValues["Mémoire"]}
+            unit="Gb"
+            min={0}
+            max={100}
+            onChange={(value) => handleSourceChange("Mémoire", value)}
+          />
+          <BoxConsumption value={memoryImpact} />
+        </Box>
+
         <Box title="Réseau">
           <BoxInput
             label="Transfert"
@@ -325,6 +339,7 @@ function App() {
                       color: "bg-purple-200",
                       label: "Réseau",
                     },
+                    { value: memoryImpact, color: "bg-green-200", label: "Mémoire" },
                   ].map((component, i) => {
                     const percentage =
                       (component.value * 100) /
@@ -389,7 +404,7 @@ function App() {
                 })}
               </div>
               <div className="mt-2 text-xs text-zinc-500">
-                * Inclut la fabrication et l'usage. Pour les voitures, moyenne
+                Inclut la fabrication et l'usage. Pour les voitures, moyenne
                 de 2 personnes par véhicule.
               </div>
             </div>
