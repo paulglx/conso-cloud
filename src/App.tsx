@@ -256,7 +256,7 @@ function App() {
           </div>
         </Box>
 
-        <Box title="Calcul">
+        <Box title="CPUs">
           <div className="space-y-6">
             <BoxInput
               label="Nombre"
