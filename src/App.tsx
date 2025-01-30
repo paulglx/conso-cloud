@@ -79,8 +79,9 @@ function App() {
   });
 
   const [selectedGpu, setSelectedGpu] = useState<string>(GPU_MODELS[0].name);
-  const [gpuValues, setGpuValues] = useState<Record<string, { units: number; utilization: number }>>({
-    [GPU_MODELS[0].name]: { units: 0, utilization: 0 },
+  const [gpuValues, setGpuValues] = useState<{ units: number; utilization: number }>({
+    units: 0,
+    utilization: 0,
   });
 
   /// Computations ///
@@ -96,26 +97,25 @@ function App() {
   const cpuPower =
     CPU_POWER[cloudProvider].min +
     (CPU_POWER[cloudProvider].max - CPU_POWER[cloudProvider].min) *
-      cpuUtilization;
+    cpuUtilization;
   const cpuImpact = sourceValues["Nombre de vCPUs"] * cpuPower * HOURS_PER_YEAR;
 
   const networkImpact =
     sourceValues["Transfert réseau"] * 1000 * MONTH_PER_YEAR;
 
-  const gpuImpact = Object.keys(gpuValues).reduce((total, gpu) => {
-    const { units, utilization } = gpuValues[gpu];
-    const gpuModel = GPU_MODELS.find(model => model.name === gpu);
-    if (gpuModel) {
-      const power = gpuModel.idle + (gpuModel.max - gpuModel.idle) * (utilization / 100);
-      return total + (power * units * HOURS_PER_YEAR);
-    }
-    return total;
-  }, 0);
+  const { units, utilization } = gpuValues;
+  const gpuModel = GPU_MODELS.find(model => model.name === selectedGpu);
+
+  let gpuImpact = 0;
+  if (gpuModel) {
+    const power = gpuModel.idle + (gpuModel.max - gpuModel.idle) * (utilization / 100);
+    gpuImpact = power * units * HOURS_PER_YEAR;
+  }
 
   const totalElec: number = Number(
     roundToDecimals(
       (hddImpact + ssdImpact + cpuImpact + networkImpact + memoryImpact + gpuImpact) *
-        PROVIDER_PUE[cloudProvider],
+      PROVIDER_PUE[cloudProvider],
       1,
     ),
   );
@@ -283,12 +283,7 @@ function App() {
         <Box title="GPUs">
           <Listbox
             value={selectedGpu}
-            onChange={(gpu) => {
-              setSelectedGpu(gpu);
-              if (!gpuValues[gpu]) {
-                setGpuValues((prev) => ({ ...prev, [gpu]: { units: 0, utilization: 0 } }));
-              }
-            }}
+            onChange={(gpu) => setSelectedGpu(gpu)}
             as="div"
             className="w-full py-2"
           >
@@ -313,19 +308,19 @@ function App() {
 
           <BoxInput
             label={`Nombre`}
-            value={gpuValues[selectedGpu]?.units}
+            value={gpuValues.units}
             unit="unités"
             min={0}
             max={5}
-            onChange={(value) => setGpuValues((prev) => ({ ...prev, [selectedGpu]: { ...prev[selectedGpu], units: value } }))}
+            onChange={(value) => setGpuValues((prev) => ({ ...prev, units: value }))}
           />
           <BoxInput
             label={`Utilisation moyenne`}
-            value={gpuValues[selectedGpu]?.utilization}
+            value={gpuValues.utilization}
             unit="%"
             min={0}
             max={100}
-            onChange={(value) => setGpuValues((prev) => ({ ...prev, [selectedGpu]: { ...prev[selectedGpu], utilization: value } }))}
+            onChange={(value) => setGpuValues((prev) => ({ ...prev, utilization: value }))}
           />
           <BoxConsumption value={gpuImpact} />
         </Box>
