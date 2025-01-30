@@ -568,7 +568,7 @@ function App() {
                   return (
                     <div
                       key={country.country}
-                      className="text-center p-4 bg-zinc-100 rounded-lg"
+                      className="flex flex-col items-center text-center p-4 bg-zinc-100 rounded-lg"
                     >
                       <div className="text-2xl mb-2">{country.icon}</div>
                       <div className="text-sm text-zinc-600">
@@ -576,7 +576,12 @@ function App() {
                       </div>
                       <div className="font-bold text-lg mt-1">{equivalent}</div>
                       <div className="text-xs text-zinc-500">
-                        ({country.emission} TCO2e/personne/an)
+                        ({country.emission}
+                        <span className="hidden md:inline">
+                          {" "}
+                          TCO2e/personne/an
+                        </span>
+                        <span className="inline md:hidden"> TCO2e/per/an</span>)
                       </div>
                     </div>
                   );
