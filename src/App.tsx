@@ -1,5 +1,6 @@
 import {
   CO2_INTENSITY,
+  GPU_MODELS,
   CloudProvider,
   REGIONS_BY_PROVIDER,
   Region,
@@ -73,6 +74,11 @@ function App() {
     "Mémoire": 0,
   });
 
+  const [selectedGpu, setSelectedGpu] = useState<string>(GPU_MODELS[0].name);
+  const [gpuValues, setGpuValues] = useState<Record<string, { units: number; utilization: number }>>({
+    [GPU_MODELS[0].name]: { units: 0, utilization: 0 },
+  });
+
   /// Computations ///
   const HOURS_PER_YEAR = 8760;
   const MONTH_PER_YEAR = 12;
@@ -92,9 +98,19 @@ function App() {
   const networkImpact =
     sourceValues["Transfert réseau"] * 1000 * MONTH_PER_YEAR;
 
+  const gpuImpact = Object.keys(gpuValues).reduce((total, gpu) => {
+    const { units, utilization } = gpuValues[gpu];
+    const gpuModel = GPU_MODELS.find(model => model.name === gpu);
+    if (gpuModel) {
+      const power = gpuModel.idle + (gpuModel.max - gpuModel.idle) * (utilization / 100);
+      return total + (power * units * HOURS_PER_YEAR);
+    }
+    return total;
+  }, 0);
+
   const totalElec: number = Number(
     roundToDecimals(
-      (hddImpact + ssdImpact + cpuImpact + networkImpact + memoryImpact) *
+      (hddImpact + ssdImpact + cpuImpact + networkImpact + memoryImpact + gpuImpact) *
       PROVIDER_PUE[cloudProvider],
       1,
     ),
@@ -148,7 +164,7 @@ function App() {
     }
   };
   return (
-    <div className="mx-4 sm:mx-8 md:mx-16 lg:mx-32 my-6 md:my-24">
+    <div className="mx-4 sm:mx-8 md:mx-16 lg:mx-24 my-6 md:my-24">
       <Box
         title="Calculateur de Consommation"
         className="px-6 sm:px-8 md:px-10 py-10"
@@ -157,7 +173,7 @@ function App() {
           Quelle conso pour mon cloud ?
         </h2>
       </Box>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
         <Box title="Cloud Provider">
           <Listbox
             value={cloudProvider}
@@ -260,6 +276,56 @@ function App() {
           <BoxConsumption value={cpuImpact} />
         </Box>
 
+        <Box title="GPUs">
+          <Listbox
+            value={selectedGpu}
+            onChange={(gpu) => {
+              setSelectedGpu(gpu);
+              if (!gpuValues[gpu]) {
+                setGpuValues((prev) => ({ ...prev, [gpu]: { units: 0, utilization: 0 } }));
+              }
+            }}
+            as="div"
+            className="w-full py-2"
+          >
+            <ListboxButton className="bg-white px-3 py-1.5 border rounded w-full text-left">
+              {selectedGpu}
+            </ListboxButton>
+            <ListboxOptions
+              anchor="bottom start"
+              className={`bg-white border rounded text-left z-20 [--anchor-gap:4px]`}
+            >
+              {GPU_MODELS.map((gpu) => (
+                <ListboxOption
+                  key={gpu.name}
+                  value={gpu.name}
+                  className={`cursor-pointer px-2 py-1 m-1 rounded hover:bg-gray-50 ${gpu.name === selectedGpu ? "text-blue-600 bg-blue-50" : ""}`}
+                >
+                  {gpu.name}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Listbox>
+
+          <BoxInput
+            label={`Nombre`}
+            value={gpuValues[selectedGpu]?.units}
+            unit="unités"
+            min={0}
+            max={5}
+            onChange={(value) => setGpuValues((prev) => ({ ...prev, [selectedGpu]: { ...prev[selectedGpu], units: value } }))}
+          />
+          <BoxInput
+            label={`Utilisation moyenne`}
+            value={gpuValues[selectedGpu]?.utilization}
+            unit="%"
+            min={0}
+            max={100}
+            onChange={(value) => setGpuValues((prev) => ({ ...prev, [selectedGpu]: { ...prev[selectedGpu], utilization: value } }))}
+          />
+          <BoxConsumption value={gpuImpact} />
+        </Box>
+
         <Box title="Stockage HDD">
           <BoxInput
             label="Volume"
@@ -310,7 +376,7 @@ function App() {
 
         <Box
           title="Consommation totale"
-          className="!bg-green-50 border-green-300 col-span-1 sm:col-span-2 lg:col-span-3"
+          className="!bg-green-50 border-green-300 col-span-1 sm:col-span-2"
         >
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8">
             <div>
@@ -340,6 +406,7 @@ function App() {
                       label: "Réseau",
                     },
                     { value: memoryImpact, color: "bg-green-200", label: "Mémoire" },
+                    { value: gpuImpact, color: "bg-gray-200", label: "GPU" }
                   ].map((component, i) => {
                     const percentage =
                       (component.value * 100) /
@@ -367,7 +434,7 @@ function App() {
 
         <Box
           title="Équivalences"
-          className="col-span-1 sm:col-span-2 lg:col-span-3"
+          className="col-span-1 sm:col-span-2"
         >
           <div className="grid grid-cols-1 gap-6">
             <div>
