@@ -33,8 +33,12 @@ const SOURCES = [
     url: "https://ourworldindata.org/food-choice-vs-eating-local",
   },
   {
-    name: "Our World In Data",
-    url: "https://ourworldindata.org/co2-emissions",
+    name: "U.S. Environmental Protection Agency",
+    url: "https://www.epa.gov/",
+  },
+  {
+    name: "IPCC (Intergovernmental Panel on Climate Change)",
+    url: "https://www.osti.gov/etdeweb/biblio/20880391",
   },
 ];
 
@@ -70,7 +74,7 @@ function App() {
     "Stockage HDD": 0,
     "Stockage SSD": 0,
     "Transfert réseau": 0,
-    "Mémoire": 0,
+    Mémoire: 0,
   });
 
   /// Computations ///
@@ -86,7 +90,7 @@ function App() {
   const cpuPower =
     CPU_POWER[cloudProvider].min +
     (CPU_POWER[cloudProvider].max - CPU_POWER[cloudProvider].min) *
-    cpuUtilization;
+      cpuUtilization;
   const cpuImpact = sourceValues["Nombre de vCPUs"] * cpuPower * HOURS_PER_YEAR;
 
   const networkImpact =
@@ -95,7 +99,7 @@ function App() {
   const totalElec: number = Number(
     roundToDecimals(
       (hddImpact + ssdImpact + cpuImpact + networkImpact + memoryImpact) *
-      PROVIDER_PUE[cloudProvider],
+        PROVIDER_PUE[cloudProvider],
       1,
     ),
   );
@@ -339,7 +343,11 @@ function App() {
                       color: "bg-purple-200",
                       label: "Réseau",
                     },
-                    { value: memoryImpact, color: "bg-green-200", label: "Mémoire" },
+                    {
+                      value: memoryImpact,
+                      color: "bg-green-200",
+                      label: "Mémoire",
+                    },
                   ].map((component, i) => {
                     const percentage =
                       (component.value * 100) /
@@ -404,8 +412,8 @@ function App() {
                 })}
               </div>
               <div className="mt-2 text-xs text-zinc-500">
-                Inclut la fabrication et l'usage. Pour les voitures, moyenne
-                de 2 personnes par véhicule.
+                Inclut la fabrication et l'usage. Pour les voitures, moyenne de
+                2 personnes par véhicule.
               </div>
             </div>
 
@@ -484,7 +492,7 @@ function App() {
       </div>
 
       <Box title="Sources" className="mt-6">
-        <ul className="space-y-2">
+        <ul className="space-y-1 mt-1">
           {SOURCES.map((source) => (
             <li key={source.url}>
               <a
