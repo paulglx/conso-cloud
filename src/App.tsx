@@ -146,13 +146,13 @@ function App() {
     }
   };
   return (
-    <div className="mx-32 my-24">
-      <Box title="Calculateur de Consommation" className="px-12 py-10">
+    <div className="mx-4 sm:mx-8 md:mx-16 lg:mx-32 my-24">
+      <Box title="Calculateur de Consommation" className="px-6 sm:px-8 md:px-10 py-10">
         <h2 className="text-lg font-semibold text-zinc-500">
           Quelle conso pour mon cloud ?
         </h2>
       </Box>
-      <div className="grid grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         <Box title="Cloud Provider">
           <Listbox
             value={cloudProvider}
@@ -293,7 +293,7 @@ function App() {
 
         <Box
           title="Consommation totale"
-          className="bg-green-100 border-green-300 col-span-3"
+          className="bg-green-100 border-green-300 col-span-1 sm:col-span-2 lg:col-span-3"
         >
           <div className="flex items-center gap-8">
             <div>
@@ -347,7 +347,7 @@ function App() {
           </div>
         </Box>
 
-        <Box title="Équivalences" className="col-span-3">
+        <Box title="Équivalences" className="col-span-1 sm:col-span-2 lg:col-span-3">
           <div className="grid grid-cols-1 gap-6">
             <div>
               <h4 className="font-semibold mb-3">Transports</h4>
